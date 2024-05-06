@@ -89,19 +89,18 @@ public class searchDialog extends javax.swing.JDialog {
 
     private void enterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterButtonActionPerformed
         // TODO add your handling code here:
-        String id = inputField.getText();
+        int id = Integer.parseInt(inputField.getText());
         
         if(option.equals("delete")){
         
         Main main = new Main();
-        main.deletefromDB(id, "personal_info");
-        main.deletefromDB(id, "academic_info");
+        main.deletefromDB(id);
             JOptionPane.showMessageDialog(rootPane, "Data deleted successfully");
             this.dispose();
         }
         else if (option.equals("update")){
             
-            if(id.equals("")){
+            if(inputField.equals("")){
                 new updateMenu(new AdminMenu(), true);
             this.dispose();
             

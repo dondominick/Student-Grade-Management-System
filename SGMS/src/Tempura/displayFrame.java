@@ -5,6 +5,7 @@
  */
 package Tempura;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,25 +26,38 @@ public class displayFrame extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         
         
-        try {
-            addData();
-        } catch (SQLException ex) {
-            Logger.getLogger(displayFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        addData();
     }
 
     
-    private void addData() throws SQLException{
-    DefaultTableModel table = (DefaultTableModel)jTable1.getModel();
-    Main m = new Main();
+    private void addData(){
+        try {
+            DefaultTableModel table = (DefaultTableModel)jTable1.getModel();
+            Main m = new Main();
+            
+            ResultSet res_personal = m.getStatement().executeQuery("SELECT student_id,name FROM personal_info");
+            ResultSet res_academic = m.getStatement().executeQuery("SELECT program,gpa,remarks FROM academic_info");
     
-    for(Student data:m.displayAllStudentInfo()){
-            String[] x = {data.student_id,data.name,data.program,data.gpa +"",data.remarks};
-
-
-            table.addRow(x);
-        }  
-        JOptionPane.showMessageDialog(rootPane, "Successful");
+              while (res_personal.next()) {          // index 0 = student id, 1 = name, 2 = program, 3 = gpa, 4 = remarks
+                res_academic.next();
+                String student_id = ""+res_personal.getInt("student_id");
+                String name = res_personal.getString("name");
+                
+           String program = res_academic.getString("program");
+            String gpa = ""+ res_academic.getDouble("gpa");
+             String remarks = res_academic.getString("remarks");
+                
+              String[] x = {student_id, name, program, gpa, remarks};
+                
+                table.addRow(x);
+              
+            }
+       
+            
+         
+        } catch (SQLException ex) {
+            Logger.getLogger(displayFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     /**
      * This method is called from within the constructor to initialize the form.

@@ -5,6 +5,7 @@
  */
 package Tempura;
 
+import java.awt.Image;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,11 +16,13 @@ public class Main {
     private static Connection con = null;
     private static Statement statement = null;
     String driver_url = "jdbc:mysql://localhost:3306/studentdb?zeroDateTimeBehavior=CONVERT_TO_NULL";
+    String username = "root";
+    String pass = "";
     
     private Connection getDBConnection(){
     try{
-    Class.forName("com.mysql.cj.jdbc.Driver");
-    con = DriverManager.getConnection(driver_url,"root","root");
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        con = DriverManager.getConnection(driver_url,username,pass);
     
         System.out.println("Connected successfully with the database");
         
@@ -28,6 +31,7 @@ public class Main {
     catch(SQLException ex){
         System.out.println("Error in connecting with the database");
         System.err.println(ex);
+       
     
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -38,42 +42,50 @@ public class Main {
     private void createTable() throws SQLException{
         DatabaseMetaData metadata = getDBConnection().getMetaData();
         getStatement();
-        ResultSet res = metadata.getTables(null , null , "personal_info", null);
+        ResultSet res = metadata.getTables(null , null , "academic_info", null);
         
         if (!res.next()) {
-            String sql = "CREATE TABLE personal_info (  "
+            String sql = "CREATE TABLE personal_info ("
                     + "student_id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                     + "name VARCHAR(50) NULL,  "
                     + "age INT(2) NULL,"
-                    + "gender VARCHAR(100) NULL,"
+                    + "gender VARCHAR(100) NULL, "
                     + "address VARCHAR(128) NULL,"
-                    + "birthday DATE NULL,"
-                    + "contact_number VARCHAR(15), "
-                    + "email VARCHAR(128) NULL"
-                    + ");";
-             
-
-            String sql_at = "CREATE TABLE academic_info ("
-                    + "student_id INT(11) NOT NULL PRIMARY KEY,"
+                    + "birthday DATE,"
+                    + "contact_number VARCHAR(15) NULL,  "
+                    + "email VARCHAR(128) NULL, "
+                    + "remarks VARCHAR(100) NULL);" ;
+            
+            String sql_ = "CREATE TABLE academic_info ("
+                    + "student_id int NOT NULL, "
                     + "program VARCHAR(50) NULL,"
                     + "midterm_grade DOUBLE NULL,"
-                    + "final_grade DOUBLE NULL,"
-                    + "gpa DOUBLE NULL"
-                    + ")";
-                    
+                    + "final_grade DOUBLE NULL, "
+                    + "gpa Double null, "
+                    + "remarks varchar(120) null,"
+                    + "foreign key (student_id) references personal_info(student_id));";
+             
+            String sql_credentials = "Create table login_credentials("
+                    + "id int primary key not null,"
+                    + "username varchar(50) unique key null,"
+                    + "password varchar(100) null);";
             statement.executeUpdate(sql);
+            statement.executeUpdate(sql_);
+            statement.executeUpdate(sql_credentials);
             System.out.println("Table successfully created");
-            statement.executeUpdate(sql_at);
-            System.out.println("Table successfully created");
-            statement.close();
-            con.close();
+            
+        
           
         }
+        
+      
+         statement.close();
+         con.close();
     
     
     }
     
-    private Statement getStatement(){
+    Statement getStatement(){
         try{
                 statement = getDBConnection().createStatement();
                 System.out.println("Statement successfully created");
@@ -86,43 +98,50 @@ public class Main {
         return statement;
     }
     
+    public int getMaxInt()throws SQLException{
+    ResultSet res = getStatement().executeQuery("Select max(student_id) from personal_info");
+    int id = 0;
+    res.next();
+    return res.getInt(1);
+    }
     
-    /*
-    SUGGESTION:
-        1. ADD AN ALGORITHM TO CHECK IF THE STUDENT ID IS ALREADY TAKEN AND CREATE A NEW STUDENT ID:
-        2. IT SHOULD RETURN A STRING 
-        3.  IT RETURNS A UNIQUE STUDENT ID FOR EACH STUDENT
+    void addtoDB(Student x) throws SQLException{
+        addtoPersonalInfo(x);
+        
+        int id = getMaxInt();
+        x.id = id;
+        addtoAcademicInfo(x);
+        addtoCredentials(x);
     
-    
-    
-    */
-    
-    /*
-    STEPS OF THE PROGRAM:
-        1. CHECKS IF AN ID IS ALREADY TAKEN, IF A GENERATED ID IS ALREADY TAKEN CREATE A NEW ONE
-        2 IF FALSE, CREATE A NEW ONE:
-        3 RETURN ID
-    */
-    String uniqueIDGenerator(){
-    String id = "";
-    
-    
-    return id;
+    }
+    void addtoCredentials(Student x){
+     try {
+                PreparedStatement prep = getDBConnection().prepareStatement("INSERT INTO login_credentials(id, username, password) VALUES (?,?,?)");
+                
+                prep.setInt(1, x.id);
+                prep.setString(2, x.username);
+                prep.setString(3, x.password);
+                prep.executeUpdate();
+            System.out.println("data added successfully to table login credentials");
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error! Data cannot be added into the database");
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
     }
     void addtoPersonalInfo(Student x){
         try {
-            PreparedStatement prep = getDBConnection().prepareStatement("INSERT INTO personal_info (student_id, name, age, gender, address, birthday, contact_number, email) VALUES (?,?,?,?,?,?,?,?)");
-            prep.setInt(1, x.id);
-            prep.setString(2, x.name);
-            prep.setInt(3, x.age);
-            prep.setString(4, x.gender);
-            prep.setString(5, x.address);
-            prep.setString(6, x.birthday);
-            prep.setString(7, x.contact_no);
-            prep.setString(8, x.email);
+            PreparedStatement prep = getDBConnection().prepareStatement("INSERT INTO personal_info (name, age, gender, address, birthday, contact_number, email) VALUES (?,?,?,?,?,?,?)");
+
+            prep.setString(1, x.name);
+            prep.setInt(2, x.age);
+            prep.setString(3, x.gender);
+            prep.setString(4, x.address);
+            prep.setString(5, x.birthday);
+            prep.setString(6, x.contact_no);
+            prep.setString(7, x.email);
             prep.executeUpdate();
             
-            JOptionPane.showMessageDialog(null, "Data added successfully to the database");
+            System.out.println("Data added succssfully to table personal info");
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error! Data cannot be added into the database");
@@ -134,6 +153,7 @@ public class Main {
     public void addtoAcademicInfo(Student x){
         try {
                 PreparedStatement prep = getDBConnection().prepareStatement("INSERT INTO academic_info(student_id, program, midterm_grade, final_grade, gpa) VALUES (?,?,?,?,?)");
+                
                 prep.setInt(1, x.id);
                 prep.setString(2, x.program);
                 prep.setDouble(3, x.mid_grade);
@@ -141,19 +161,19 @@ public class Main {
                 prep.setDouble(5, x.gpa);
                 
                 prep.executeUpdate();
-                JOptionPane.showMessageDialog(null, "Data added successfully to the database");
-
+            System.out.println("data added successfully to table academic info");
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(null, "Error! Data cannot be added into the database");
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
     }
-    public void deletefromDB(String id, String table){
+    public void deletefromDB(int id){
         try{
             
-        PreparedStatement prep = getDBConnection().prepareStatement("DELETE FROM ? WHERE student_id = ?");
-        prep.setString(2, id);
-        prep.setString(1, table);
+        PreparedStatement prep = getDBConnection().prepareStatement("DELETE FROM personal_info, academic_info WHERE student_id = ?");
+       
+        
+         prep.setInt(1, id);
         prep.executeUpdate();
         }
         catch(SQLException ex){
@@ -199,46 +219,9 @@ public class Main {
         
         JOptionPane.showMessageDialog(null, "Data updated successfully from the database");
     }
-    
-    /**
-     *
-     * @return a list of string arrays
-     * @throws SQLException
-     */
-    
-    // this method returns a list of summarized data from the database
-    
-    // NOTE: error in this method
-    /*
-    ERROR: NULL.POINTER.EXCEPTION:
-    POSSIBLE CAUSES: 
-        1.    the table 'academic_info is empty' leading to this error:
-        2. 
-    POSSIBLE SOLUTIONS:
-        1.      add data inside the table academic_info
-    
-    */
-    public ArrayList<Student> displayAllStudentInfo() throws SQLException{
+ 
         
-        ResultSet res_personal = statement.executeQuery("SELECT student_id,name FROM personal_info");
-        ResultSet res_academic = statement.executeQuery("SELECT program,gpa,remarks FROM academic_info");
-        ArrayList<Student> list = new ArrayList<Student>();
-        
-        
-        while(res_personal.next()){          // index 0 = student id, 1 = name, 2 = program, 3 = gpa, 4 = remarks
-           Student obj = new Student();
-           obj.name = res_personal.getString("name");
-           obj.student_id = res_personal.getString("student_id");
-           obj.program = res_academic.getString("program");
-           obj.gpa = res_academic.getDouble("gpa");
-           obj.remarks = res_academic.getString("remarks");
-                   
-        
-           list.add(obj);
-        }
-        return list;
-    }
-    
+      
   
     // this method returns all the information related or connected to the given student id:
     public Student displayStudentInfo(String id) throws SQLException{
@@ -266,7 +249,7 @@ public class Main {
     }
     
     public static void main(String[] args) {
-        new AdminMenu().setVisible(true);
+        new LoginForm().setVisible(true);
         try {
             new Main().createTable();
         } catch (SQLException ex) {
@@ -278,7 +261,9 @@ public class Main {
 }
 
 class Student{
-
+    
+    String username;
+    String password;
     
     // personal info attributes
     String fname, lname, mname, address, contact_no, email, student_id, birthday, gender;
@@ -296,7 +281,7 @@ class Student{
     
     
     }
-    Student(String fname, String lname, String mname, String address, String email, String contact, String birthday, String gender,String id){
+    Student(String fname, String lname, String mname, String address, String email, String contact, String birthday, String gender){
         
         setName(fname, lname, mname);
         this.address = address;
@@ -304,13 +289,13 @@ class Student{
         contact_no = contact;
         this.birthday = birthday;
         this.gender = gender;
-        this.student_id = id;
+     
     }
     
     
     // 
     void setName(String fname, String lname, String mname){
-    this.name = fname+'|'+lname+'|'+ mname;
+    this.name = fname+' '+lname+' '+ mname;
     
     }
  
@@ -338,3 +323,25 @@ class Course{
     
     
 }
+
+interface JFrameDesign{
+
+    default void scaleImage(String url, JLabel container) {
+        ImageIcon icon = new ImageIcon(url);
+        Image image = icon.getImage();
+        Image imageScale = image.getScaledInstance(container.getWidth(), container.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(imageScale);
+        container.setIcon(scaledIcon);
+
+    }
+    default void scaleImage(String url, JButton container) {
+        ImageIcon icon = new ImageIcon(url);
+        Image image = icon.getImage();
+        Image imageScale = image.getScaledInstance(container.getWidth(), container.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(imageScale);
+        container.setIcon(scaledIcon);
+
+    }
+}
+
+
