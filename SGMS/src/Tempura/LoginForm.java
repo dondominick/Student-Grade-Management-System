@@ -17,6 +17,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.jfr.EventType;
 
 /**
@@ -30,14 +33,11 @@ public class LoginForm extends javax.swing.JFrame {
     Dimension screenSize = toolkit.getScreenSize();
     int screen_width = screenSize.width;
     int screen_height = screenSize.height;
-
+    Main main = new Main();
     public LoginForm() {
         initComponents();
         scaleImage("C:\\Users\\Acer\\Downloads\\GSU (3).png",logo);
         warningText.setVisible(false);
-   
-
-   
     }
 
     private void scaleImage(String url, JLabel container) {
@@ -77,6 +77,7 @@ public class LoginForm extends javax.swing.JFrame {
         passField = new javax.swing.JPasswordField();
         showBtn = new javax.swing.JToggleButton();
         warningText = new javax.swing.JLabel();
+        forgotPassBtn = new javax.swing.JButton();
         logo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -88,14 +89,7 @@ public class LoginForm extends javax.swing.JFrame {
         LoginPanel.setBackground(new java.awt.Color(51, 51, 255));
         LoginPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         LoginPanel.setForeground(new java.awt.Color(51, 51, 255));
-        LoginPanel.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                LoginPanelKeyPressed(evt);
-            }
-        });
 
-        userField.setBackground(new java.awt.Color(255, 255, 255));
-        userField.setForeground(new java.awt.Color(0, 0, 0));
         userField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 userFieldFocusGained(evt);
@@ -111,9 +105,11 @@ public class LoginForm extends javax.swing.JFrame {
         });
 
         enterBtn.setBackground(new java.awt.Color(51, 51, 255));
+        enterBtn.setFont(new java.awt.Font("Segoe UI Black", 1, 14)); // NOI18N
         enterBtn.setForeground(new java.awt.Color(255, 255, 255));
-        enterBtn.setText("Login");
-        enterBtn.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(102, 102, 102), 1, true));
+        enterBtn.setText("LOG-IN");
+        enterBtn.setActionCommand("LOGIN");
+        enterBtn.setBorder(null);
         enterBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enterBtnActionPerformed(evt);
@@ -130,22 +126,7 @@ public class LoginForm extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        passField.setBackground(new java.awt.Color(255, 255, 255));
-        passField.setForeground(new java.awt.Color(0, 0, 0));
         passField.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        passField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                passFieldFocusGained(evt);
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                passFieldFocusLost(evt);
-            }
-        });
-        passField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                passFieldActionPerformed(evt);
-            }
-        });
         passField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 passFieldKeyPressed(evt);
@@ -153,7 +134,6 @@ public class LoginForm extends javax.swing.JFrame {
         });
 
         showBtn.setBackground(new java.awt.Color(255, 255, 255));
-        showBtn.setForeground(new java.awt.Color(0, 0, 0));
         showBtn.setText("show");
         showBtn.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         showBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -186,6 +166,16 @@ public class LoginForm extends javax.swing.JFrame {
         warningText.setForeground(new java.awt.Color(255, 0, 0));
         warningText.setText("Please enter the correct username and password.");
 
+        forgotPassBtn.setBackground(new java.awt.Color(255, 255, 255));
+        forgotPassBtn.setText("Forgot Password?");
+        forgotPassBtn.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        forgotPassBtn.setBorderPainted(false);
+        forgotPassBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                forgotPassBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout LoginPanelLayout = new javax.swing.GroupLayout(LoginPanel);
         LoginPanel.setLayout(LoginPanelLayout);
         LoginPanelLayout.setHorizontalGroup(
@@ -197,10 +187,12 @@ public class LoginForm extends javax.swing.JFrame {
                         .addComponent(jLabel1)
                         .addGap(164, 164, 164))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, LoginPanelLayout.createSequentialGroup()
-                        .addGroup(LoginPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(userField, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(warningText, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(LoginPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(forgotPassBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(LoginPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(userField, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(warningText, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(45, 45, 45))))
             .addGroup(LoginPanelLayout.createSequentialGroup()
                 .addGroup(LoginPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -209,7 +201,7 @@ public class LoginForm extends javax.swing.JFrame {
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(LoginPanelLayout.createSequentialGroup()
                         .addGap(157, 157, 157)
-                        .addComponent(enterBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(enterBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         LoginPanelLayout.setVerticalGroup(
@@ -221,11 +213,13 @@ public class LoginForm extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(userField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(54, 54, 54)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(forgotPassBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(23, 23, 23)
                 .addComponent(enterBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(72, 72, 72))
         );
@@ -253,7 +247,7 @@ public class LoginForm extends javax.swing.JFrame {
                 .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(42, 42, 42)
                 .addComponent(LoginPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(308, Short.MAX_VALUE))
+                .addContainerGap(314, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -272,27 +266,28 @@ public class LoginForm extends javax.swing.JFrame {
 
     private void enterBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterBtnActionPerformed
         String user = userField.getText();
-        String pass = passField.getText(); // temporary
-        if(user.equalsIgnoreCase("admin") && pass.equals("123")){
-            new AdminMenu().setVisible(true);
-            this.dispose();
-        }
+            String pass = passField.getText(); // temporary
+            if (user.equalsIgnoreCase("admin") && pass.equals("123")) {
+                new AdminMenu().setVisible(true);
+                this.dispose();
+            } else if (main.isStudentInDBemail(user)) {
+                System.out.println("Student found");
 
-        else if(user.equalsIgnoreCase("student") && pass.equals("123")){
-            new StudentDisplay().setVisible(true);
-            this.dispose();
-        }else{
-            warningText.setVisible(true);
+                if (pass.equals(new Main().getPasswordIDbyEmail(user))) {
+                    new StudentDisplay(main.getStudentByEmail(user)).setVisible(true);
+                    this.dispose();
+                }
+                else{
+                warningText.setVisible(true);
+                }
+            } else {
+                warningText.setVisible(true);
             }
     }//GEN-LAST:event_enterBtnActionPerformed
 
-    private void passFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_passFieldActionPerformed
-
-        boolean showbtn_pressed = false;
-    private void showBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showBtnActionPerformed
        
+    private void showBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showBtnActionPerformed
+        boolean showbtn_pressed = false;
         if(showbtn_pressed == false){
             showbtn_pressed = true;
             passField.setEchoChar((char) 0);
@@ -302,9 +297,7 @@ public class LoginForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_showBtnActionPerformed
 
-    private void LoginPanelKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_LoginPanelKeyPressed
-
-    }//GEN-LAST:event_LoginPanelKeyPressed
+    
 
     private void userFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_userFieldKeyPressed
         int keyCode = evt.getKeyCode();
@@ -314,11 +307,16 @@ public class LoginForm extends javax.swing.JFrame {
             if (user.equalsIgnoreCase("admin") && pass.equals("123")) {
                 new AdminMenu().setVisible(true);
                 this.dispose();
-            } else if (user.equalsIgnoreCase("student") && pass.equals("123")) {
-                new StudentDisplay().setVisible(true);
-                this.dispose();
-            }else{
-            warningText.setVisible(true);
+            } else if (main.isStudentInDBemail(user)) {
+                System.out.println("Student found");
+
+                if (pass.equals(new Main().getPasswordIDbyEmail(user))) {
+                    new StudentDisplay(main.getStudentByEmail(user)).setVisible(true);
+                    this.dispose();
+                }
+                else{warningText.setVisible(true);}
+            } else {
+                warningText.setVisible(true);
             }
         }
 
@@ -333,48 +331,32 @@ public class LoginForm extends javax.swing.JFrame {
             if (user.equalsIgnoreCase("admin") && pass.equals("123")) {
                 new AdminMenu().setVisible(true);
                 this.dispose();
-            } else if (user.equalsIgnoreCase("student") && pass.equals("123")) {
-                new StudentDisplay().setVisible(true);
-                this.dispose();
-            }else{
-            warningText.setVisible(true);
+            } else if (main.isStudentInDBemail(user)) {
+                System.out.println("Student found");
+
+                if (pass.equals(new Main().getPasswordIDbyEmail(user))) {
+                    new StudentDisplay(main.getStudentByEmail(user)).setVisible(true);
+                    this.dispose();
+                }else{
+                warningText.setVisible(true);
+                }
+            } else {
+                warningText.setVisible(true);
             }
         }
     }//GEN-LAST:event_passFieldKeyPressed
 
     private void userFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_userFieldFocusGained
-        if(userField.getText().length()>= 0){
-       userField.setText("");
-        }
-        else{
-        userField.setText("Enter Username");
-        }
+ 
     }//GEN-LAST:event_userFieldFocusGained
 
     private void userFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_userFieldFocusLost
-        if(userField.getText().isEmpty()){
-        userField.setText("Enter Username");
-        }
+
     }//GEN-LAST:event_userFieldFocusLost
 
-    private void passFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_passFieldFocusLost
-        if(passField.getText().isEmpty()){
-            passField.setText("Enter Password");
-            passField.setEchoChar((char) 0);
-            
-        }    }//GEN-LAST:event_passFieldFocusLost
-
-    private void passFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_passFieldFocusGained
-      if(userField.getText().length()>= 0){
-            passField.setEchoChar('*');
-       passField.setText("");
-     
-        }
-        else{
-        passField.setText("Enter Password");
-        passField.setEchoChar((char) 0);
-        }
-    }//GEN-LAST:event_passFieldFocusGained
+    private void forgotPassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forgotPassBtnActionPerformed
+        new ForgotPasswordDialog(this, true).setVisible(true);
+    }//GEN-LAST:event_forgotPassBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -415,6 +397,7 @@ public class LoginForm extends javax.swing.JFrame {
     private javax.swing.JPanel BackgroundPanel;
     private javax.swing.JPanel LoginPanel;
     private javax.swing.JButton enterBtn;
+    private javax.swing.JButton forgotPassBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
