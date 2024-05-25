@@ -5,6 +5,7 @@
  */
 package Tempura;
 
+import java.awt.Frame;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
@@ -13,22 +14,13 @@ import javax.swing.JOptionPane;
  * @author steph
  */
 public class searchDialog extends javax.swing.JDialog {
-
- 
-    private String option = "";
-    
-    public searchDialog(java.awt.Frame parent, boolean modal, String option) {
-        super(parent, modal);
-        initComponents();
-        this.option = option;
-        setLocationRelativeTo(null);
-    }
+  
     public searchDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(null);
-    
     }
+    
     
     
 
@@ -88,33 +80,7 @@ public class searchDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void enterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterButtonActionPerformed
-        // TODO add your handling code here:
-        int id = Integer.parseInt(inputField.getText());
-        
-        if(option.equals("delete")){
-        
-        Main main = new Main();
-        main.deletefromDB(id);
-            JOptionPane.showMessageDialog(rootPane, "Data deleted successfully");
-            this.dispose();
-        }
-        else if (option.equals("update")){
-            
-            if(inputField.equals("")){
-                new updateMenu(new AdminMenu(), true);
-            this.dispose();
-            
-            
-            }
-            else{
-            
-            }
-            
-        
-        }
-        else{
-            
-        }
+        System.out.println("Parent is working");
     }//GEN-LAST:event_enterButtonActionPerformed
 
     /**
@@ -165,3 +131,18 @@ public class searchDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
+
+
+class deleteDialog extends searchDialog{
+
+    public deleteDialog(Frame parent, boolean modal) {
+        super(parent, modal);
+        
+    }
+
+    private void enterButtonActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        System.out.println("delete dialog is working");
+    }   
+
+}
+
